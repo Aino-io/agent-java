@@ -22,6 +22,10 @@ This project contains Java implementation for [aino.io](http://aino.io) logging.
 ## Usage
 Before using the agent, it needs to be configured. Agent can be configured manually or via configuration file.
 
+### Add as Maven/Gradle/Ivy dependency
+
+Get the dependency snippet from [here](https://bintray.com/aino-io/maven/agent-java/view).
+
 ### Configuring the agent
 Agent is configured with XML configuration file. Below is example.
 
