@@ -15,7 +15,7 @@ This Agent helps to store data about the transactions to Aino.io platform using 
 See [API documentation](http://www.aino.io/api) for detailed information about the API.
 
 ## Technical requirements
-* Oracle Java 6 or higher
+* Oracle Java 6 or 7
 
 ## Example usage
 Before using the agent, it needs to be configured. Agent can be configured manually or via configuration file.
