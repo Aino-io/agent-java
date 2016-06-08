@@ -38,9 +38,11 @@ public class AgentIntegrationTest {
     private static final String API_URL = "http://localhost:8808/api/1.0";
     private static final String AINO_CONFIG = "validConfig.xml";
     private static final String AINO_CONFIG_WITH_LONG_INTERVAL = "validConfigWithIntervalAndSize.xml";
+    private static final String AINO_CONFIG_WITH_PROXY = "validConfigWithProxy.xml";
 
     private Agent ainoAgent = getAinoLogger();
     private Agent slowAinoAgent = getSlowAinoLogger();
+    private Agent proxiedAinoAgent = getProxiedAinoLogger();
 
     private static Agent getAinoLogger() {
         Agent.LoggerFactory ainoLoggerFactory = new Agent.LoggerFactory();
@@ -50,6 +52,11 @@ public class AgentIntegrationTest {
     private static Agent getSlowAinoLogger() {
         Agent.LoggerFactory ainoLoggerFactory = new Agent.LoggerFactory();
         return ainoLoggerFactory.setConfigurationBuilder(new ClasspathResourceConfigBuilder(AINO_CONFIG_WITH_LONG_INTERVAL)).build();
+    }
+
+    private static Agent getProxiedAinoLogger() {
+        Agent.LoggerFactory ainoLoggerFactory = new Agent.LoggerFactory();
+        return ainoLoggerFactory.setConfigurationBuilder(new ClasspathResourceConfigBuilder(AINO_CONFIG_WITH_PROXY)).build();
     }
 
     @Before
@@ -70,11 +77,21 @@ public class AgentIntegrationTest {
 
     @Test
     public void loggerSendsDataToMockApiTest() throws Exception {
-        Transaction tle = new Transaction(ainoAgent.getAgentConfig());
+        assertLoggerSendsDataToMockApi(ainoAgent);
+    }
+
+    @Test
+    public void loggerSendsDataToMockApiThroughProxyTest() throws Exception {
+        assertLoggerSendsDataToMockApi(proxiedAinoAgent);
+        //TODO assert proxy was used
+    }
+
+    public void assertLoggerSendsDataToMockApi(Agent agent) throws Exception {
+        Transaction tle = new Transaction(agent.getAgentConfig());
         tle.setFromKey("app01");
         tle.setOperationKey("create");
         tle.setToKey("esb");
-        ainoAgent.addTransaction(tle);
+        agent.addTransaction(tle);
 
         Thread.sleep(2000); // :(
         HttpMethod get = new GetMethod(API_URL + "/test/readTransactions");
