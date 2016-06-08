@@ -30,7 +30,7 @@ public class ConfigBuilderTest {
     public void testConfigBuilderDoesNotThrowWithValidConf() {
         AgentConfig conf = new ClasspathResourceConfigBuilder("validConfig.xml").build();
 
-        assertNotNull("AgentConfig object shout not be null", conf);
+        assertNotNull("AgentConfig object should not be null", conf);
     }
 
     @Test(expected = InvalidAgentConfigException.class)
@@ -43,7 +43,7 @@ public class ConfigBuilderTest {
         File file = new File(this.getClass().getClassLoader().getResource("validConfig.xml").getPath());
         AgentConfig conf = new FileConfigBuilder(file).build();
 
-        assertNotNull("AgentConfig object shout not be null", conf);
+        assertNotNull("AgentConfig object should not be null", conf);
     }
 
     @Test
