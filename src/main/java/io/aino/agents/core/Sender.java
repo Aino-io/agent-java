@@ -81,7 +81,7 @@ public class Sender implements Runnable, TransactionDataObserver {
 
     @Override
     public void run() {
-        URLConnectionClientHandler connection = HttpProxyFactory.getConnectionHandler();
+        URLConnectionClientHandler connection = HttpProxyFactory.getConnectionHandler(agentConfig);
         Client restClient = new Client(connection);
         resource = restClient.resource(agentConfig.getLogServiceUri());
 

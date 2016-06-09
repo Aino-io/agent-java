@@ -89,7 +89,7 @@ public class ConfigBuilderTest {
 
         AgentConfig confWithProxy = new ClasspathResourceConfigBuilder("validConfigWithProxy.xml").build();
         assertEquals("proxy should be defined", true, confWithProxy.isProxyDefined());
-        assertEquals("proxy host should be set", "http://127.0.0.1", confWithProxy.getProxyHost());
+        assertEquals("proxy host should be set", "127.0.0.1", confWithProxy.getProxyHost());
         assertEquals("proxy port should be set", 8080, confWithProxy.getProxyPort());
     }
 

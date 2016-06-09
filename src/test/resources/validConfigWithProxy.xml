@@ -1,7 +1,7 @@
 <ainoConfig>
     <ainoLoggerService enabled="true">
         <address uri="http://localhost:8808/api/1.0/saveLogArray" apiKey="80D0710C-2EE6-481E-BA9E-9A21C2486EE7"/>
-        <proxy host="http://127.0.0.1" port="8080" />
+        <proxy host="127.0.0.1" port="8080" />
         <send interval="1000" sizeThreshold="0" gzipEnabled="true"/>
     </ainoLoggerService>
     <operations>
