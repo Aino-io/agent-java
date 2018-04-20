@@ -51,6 +51,18 @@ public class SenderTest {
         }
     };
 
+    private ApiResponse apiResponseServiceUnavailable = new ApiResponse() {
+        @Override
+        public int getStatus() {
+            return HttpStatus.SC_SERVICE_UNAVAILABLE;
+        }
+
+        @Override
+        public String getPayload() {
+            return "Full HTML message page";
+        }
+    };
+
     @BeforeClass
     public static void initConfigs() throws FileNotFoundException {
         validConfig = new FileConfigBuilder(new File("src/test/resources/validConfig.xml")).build();
@@ -74,6 +86,18 @@ public class SenderTest {
         verify(apiClient, times(trxCount)).send(any(byte[].class));
     }
 
+    @Test
+    public void testEventIsLoggedWhenRetryFails() throws IOException, InterruptedException {
+        final int trxCount = 2;
+        TransactionDataBuffer dataBuffer = initDataBuffer(trxCount);
+        when(apiClient.send(any(byte[].class))).thenReturn(apiResponseServiceUnavailable);
+        Sender sender = new Sender(validConfig, dataBuffer, apiClient);
+        new Thread(sender).start();
+        Thread.sleep(1500l);
+        sender.stop();
+        // 4 retries for each send so total call nymber is 4*trxCount
+        verify(apiClient, times(trxCount*4)).send(any(byte[].class));
+    }
     private TransactionDataBuffer initDataBuffer(int trxCount) {
         TransactionDataBuffer dataBuffer = new TransactionDataBuffer(1);
         for (int i = 0; i < trxCount; i++) {

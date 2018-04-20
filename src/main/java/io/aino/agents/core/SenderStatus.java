@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 class SenderStatus {
     private static final Log log = LogFactory.getLog(SenderStatus.class);
 
-    private static final int MAX_RETRIES = 4;
+    public static final int MAX_RETRIES = 4;
     boolean retryLastSend = false;
     int retryCount = 0;
 
