@@ -139,6 +139,11 @@ public class AgentIntegrationTest {
     }
 
     @Test
+    public void loggerSendsManyTransactionsToMockApiTest() throws Exception {
+        assertLoggerSendsManyTransactionsToMockApi(slowAinoAgent);
+    }
+
+    @Test
     public void loggerSendsDataToMockApiThroughProxyTest() throws Exception {
         if(!isProxyUp()) {
             System.out.println("------------------------------------------------------------------------");
@@ -199,16 +204,27 @@ public class AgentIntegrationTest {
     }
 
     public void assertLoggerSendsManyTransactionsToMockApi(Agent agent) throws Exception {
-        initializeBatchTransaction(agent,1000);
+        System.out.println("agent.isenabled="+agent.isEnabled());
+        System.out.println("SIZE-TRESHOLD="+agent.getAgentConfig().getSizeThreshold());
+        initializeBatchTransaction(agent,100);
 
-        Thread.sleep(2000); // :(
+        // wait for first send
+        Thread.sleep(1000); // :(
         HttpMethod get = new GetMethod(API_URL + "/test/readTransactions");
         int statusCode = client.executeMethod(get);
-
+        System.out.println("GET="+get.getResponseBodyAsString());
         JsonNode transactions = parseJsonFromResponseBody(get).findPath("transactions");
         assertNotNull("JsonNode 'transactions' should not be null", transactions);
         System.out.println("transactions.size="+transactions.size());
-        assertEquals("There should be exactly 1 transaction", 1, transactions.size());
+        assertEquals("There should be exactly 10 transaction", 10, transactions.size());
+
+        // wait  until all items are sent
+        Thread.sleep(30000); // :(
+        statusCode = client.executeMethod(get);
+        transactions = parseJsonFromResponseBody(get).findPath("transactions");
+        assertNotNull("JsonNode 'transactions' should not be null", transactions);
+        System.out.println("transactions.size="+transactions.size());
+        assertEquals("There should be exactly 100 transaction", 100, transactions.size());
 
         JsonNode operationNode = transactions.get(0).get("operation");
         assertEquals("Create", operationNode.asText());
@@ -216,6 +232,7 @@ public class AgentIntegrationTest {
     }
 
     private void initializeBatchTransaction(Agent agent, int count){
+        System.out.println("Generate "+count+" transactions to agent-core");
         for(int x=0;x<count;x++) {
             Transaction tle = new Transaction(agent.getAgentConfig());
             tle.setFromKey("app01");

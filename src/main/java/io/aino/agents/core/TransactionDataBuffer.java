@@ -118,8 +118,12 @@ public class TransactionDataBuffer {
     }
 
     private int elementsToDrain() {
-        // ensure transactions get sent one at a time when size threshold is zero or one
-        return sizeThreshold <= 1 ? 1 : Integer.MAX_VALUE;
+        int maxDrain = 500; // Aino server can handle max 500 transaction  in one rest-call so we limit it here
+        if(sizeThreshold < maxDrain)
+            // ensure transactions get sent one at a time when size threshold is zero or one
+            return sizeThreshold <= 1 ? 1 : sizeThreshold;
+        else
+            return maxDrain;
     }
 
 }
