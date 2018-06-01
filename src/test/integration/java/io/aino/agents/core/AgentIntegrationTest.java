@@ -198,6 +198,34 @@ public class AgentIntegrationTest {
         return tle;
     }
 
+    public void assertLoggerSendsManyTransactionsToMockApi(Agent agent) throws Exception {
+        initializeBatchTransaction(agent,1000);
+
+        Thread.sleep(2000); // :(
+        HttpMethod get = new GetMethod(API_URL + "/test/readTransactions");
+        int statusCode = client.executeMethod(get);
+
+        JsonNode transactions = parseJsonFromResponseBody(get).findPath("transactions");
+        assertNotNull("JsonNode 'transactions' should not be null", transactions);
+        System.out.println("transactions.size="+transactions.size());
+        assertEquals("There should be exactly 1 transaction", 1, transactions.size());
+
+        JsonNode operationNode = transactions.get(0).get("operation");
+        assertEquals("Create", operationNode.asText());
+        assertEquals(200, statusCode);
+    }
+
+    private void initializeBatchTransaction(Agent agent, int count){
+        for(int x=0;x<count;x++) {
+            Transaction tle = new Transaction(agent.getAgentConfig());
+            tle.setFromKey("app01");
+            tle.setOperationKey("create");
+            tle.setToKey("esb");
+            tle.addMetadata("item_number",String.valueOf(x));
+            agent.addTransaction(tle);
+        }
+    }
+
     @Test
     public void loggerSendsDataToMockApiWithDelay() throws Exception {
         Transaction tle = new Transaction(slowAinoAgent.getAgentConfig());
