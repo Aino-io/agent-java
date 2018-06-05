@@ -83,7 +83,6 @@ public class TransactionDataBuffer {
     public String getDataToSend() throws IOException {
         final List<TransactionSerializable> entries = new ArrayList<TransactionSerializable>();
         this.transactions.drainTo(entries, elementsToDrain());
-
         return mapper.writeValueAsString(new Object() {
             private final List<TransactionSerializable> transactions = entries;
             public List<TransactionSerializable> getTransactions() { return transactions; } // Needed for mapper?
@@ -118,7 +117,7 @@ public class TransactionDataBuffer {
     }
 
     private int elementsToDrain() {
-        int maxDrain = 500; // Aino server can handle max 500 transaction  in one rest-call so we limit it here
+        int maxDrain = 400; // Aino server can handle max 500 transaction  in one rest-call so we limit it here to the safe level
         if(sizeThreshold < maxDrain)
             // ensure transactions get sent one at a time when size threshold is zero or one
             return sizeThreshold <= 1 ? 1 : sizeThreshold;
