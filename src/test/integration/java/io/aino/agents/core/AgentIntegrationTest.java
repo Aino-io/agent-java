@@ -234,13 +234,6 @@ public class AgentIntegrationTest {
         JsonNode operationNode = transactions.get(0).get("operation");
         assertEquals("Create", operationNode.asText());
         assertEquals(200, statusCode);
-
-        // Check last request size
-        get = new GetMethod(" http://localhost:8808/api/1.0/saveLogArray/services/operations/recorded-requests");
-        statusCode = client.executeMethod(get);
-        System.out.println(statusCode+ " - GET="+get.getResponseBodyAsString());
-
-
     }
 
     private void initializeBatchTransaction(Agent agent, int count){
