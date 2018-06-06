@@ -19,6 +19,7 @@ package io.aino.agents.core;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import io.aino.agents.core.config.AgentConfig;
 
@@ -37,6 +38,7 @@ public class DefaultApiClient implements ApiClient {
         this.agentConfig = config;
         URLConnectionClientHandler connection = HttpProxyFactory.getConnectionHandler(agentConfig);
         Client restClient = new Client(connection);
+        restClient.addFilter(new LoggingFilter());
         resource = restClient.resource(agentConfig.getLogServiceUri());
     }
 

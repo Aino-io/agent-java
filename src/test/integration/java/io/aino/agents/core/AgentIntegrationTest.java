@@ -45,10 +45,12 @@ public class AgentIntegrationTest {
     private static final String API_URL = "http://localhost:8808/api/1.0";
     private static final String AINO_CONFIG = "validConfig.xml";
     private static final String AINO_CONFIG_WITH_LONG_INTERVAL = "validConfigWithIntervalAndSize.xml";
+    private static final String AINO_CONFIG_WITH_SIZE = "validConfigWithSize.xml";
     private static final String AINO_CONFIG_WITH_PROXY = "validConfigWithProxy.xml";
 
     private Agent ainoAgent = getAinoLogger();
     private Agent slowAinoAgent = getSlowAinoLogger();
+    private Agent limitedAinoAgent = getLimitedAinoLogger();
     private Agent proxiedAinoAgent = getProxiedAinoLogger();
 
     private static Agent getAinoLogger() {
@@ -59,6 +61,11 @@ public class AgentIntegrationTest {
     private static Agent getSlowAinoLogger() {
         Agent.LoggerFactory ainoLoggerFactory = new Agent.LoggerFactory();
         return ainoLoggerFactory.setConfigurationBuilder(new ClasspathResourceConfigBuilder(AINO_CONFIG_WITH_LONG_INTERVAL)).build();
+    }
+
+    private static Agent getLimitedAinoLogger() {
+        Agent.LoggerFactory ainoLoggerFactory = new Agent.LoggerFactory();
+        return ainoLoggerFactory.setConfigurationBuilder(new ClasspathResourceConfigBuilder(AINO_CONFIG_WITH_SIZE)).build();
     }
 
     private static Agent getProxiedAinoLogger() {
@@ -139,6 +146,12 @@ public class AgentIntegrationTest {
     }
 
     @Test
+    public void loggerSendsManyTransactionsToMockApiTest() throws Exception {
+        assertLoggerSendsManyTransactionsToMockApi(limitedAinoAgent);
+//        assertLoggerSendsManyTransactionsToMockApi(slowAinoAgent);
+    }
+
+    @Test
     public void loggerSendsDataToMockApiThroughProxyTest() throws Exception {
         if(!isProxyUp()) {
             System.out.println("------------------------------------------------------------------------");
@@ -196,6 +209,43 @@ public class AgentIntegrationTest {
         tle.setToKey("esb");
         agent.addTransaction(tle);
         return tle;
+    }
+
+    public void assertLoggerSendsManyTransactionsToMockApi(Agent agent) throws Exception {
+        initializeBatchTransaction(agent,900);
+
+        // wait for first send
+        Thread.sleep(2000); // :(
+        HttpMethod get = new GetMethod(API_URL + "/test/readTransactions");
+        int statusCode = client.executeMethod(get);
+        System.out.println("GET="+get.getResponseBodyAsString());
+        JsonNode transactions = parseJsonFromResponseBody(get).findPath("transactions");
+        assertNotNull("JsonNode 'transactions' should not be null", transactions);
+        System.out.println("transactions.size="+transactions.size());
+        assertEquals("There should be exactly 400 transaction", 400, transactions.size());
+
+        // wait  until all items are sent
+        Thread.sleep(5000); // :(
+        statusCode = client.executeMethod(get);
+        transactions = parseJsonFromResponseBody(get).findPath("transactions");
+        assertNotNull("JsonNode 'transactions' should not be null", transactions);
+        assertEquals("There should be exactly 900 transaction", 900, transactions.size());
+
+        JsonNode operationNode = transactions.get(0).get("operation");
+        assertEquals("Create", operationNode.asText());
+        assertEquals(200, statusCode);
+    }
+
+    private void initializeBatchTransaction(Agent agent, int count){
+        System.out.println("Generate "+count+" transactions to agent-core");
+        for(int x=0;x<count;x++) {
+            Transaction tle = new Transaction(agent.getAgentConfig());
+            tle.setFromKey("app01");
+            tle.setOperationKey("create");
+            tle.setToKey("esb");
+            tle.addMetadata("item_number",String.valueOf(x));
+            agent.addTransaction(tle);
+        }
     }
 
     @Test

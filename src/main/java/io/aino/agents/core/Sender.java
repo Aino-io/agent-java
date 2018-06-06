@@ -140,6 +140,9 @@ public class Sender implements Runnable, TransactionDataObserver {
             ApiResponse response = client.send(getRequestContent());
 
             status.responseStatus(response);
+            if(status.retryCount ==  status.MAX_RETRIES){
+                log.error("\nAINO_ERROR_START\n"+stringToSend+"\nAINO_ERROR_END");
+            }
         } catch (ClientHandlerException e) {
             status.exceptionStatus();
         } finally {
