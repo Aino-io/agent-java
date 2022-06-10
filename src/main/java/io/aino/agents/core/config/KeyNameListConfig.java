@@ -19,6 +19,8 @@ package io.aino.agents.core.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Class for holding key-value pairs.
  */
@@ -32,7 +34,7 @@ public class KeyNameListConfig {
      * @return value corresponding to key
      */
     public String getEntry(String key){
-        return this.entries.get(key);
+        return this.entries.get(StringUtils.lowerCase(key));
     }
 
     /**
@@ -41,10 +43,10 @@ public class KeyNameListConfig {
      * @param value value
      */
     public void addEntry(String key, String value){
-        if(this.entryExists(key)) {
+        if(this.entryExists(StringUtils.lowerCase(key))) {
             throw new InvalidAgentConfigException("key " + key + "already exists.");
         }
-        this.entries.put(key, value);
+        this.entries.put(StringUtils.lowerCase(key), value);
     }
 
     /**
@@ -63,7 +65,7 @@ public class KeyNameListConfig {
      * @return true if key was found
      */
     public boolean entryExists(String key){
-        return this.entries.containsKey(key);
+        return this.entries.containsKey(StringUtils.lowerCase(key));
     }
 
     /**
